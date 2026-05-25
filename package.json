@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
- "scripts": {
-  "start": "node src/index.js",
-  "dev": "nodemon src/index.js"
-},
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -17,6 +17,7 @@
     "express": "^5.2.1",
     "firebase-admin": "^13.10.0",
     "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^8.0.8",
     "pg": "^8.21.0"
   },
   "devDependencies": {
