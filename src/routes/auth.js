@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const pool = require('../config/db');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
@@ -21,31 +22,26 @@ const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-// Send OTP email
 const sendOTPEmail = async (email, otp, name) => {
-  const mailOptions = {
-    from: process.env.EMAIL_FROM,
+  await resend.emails.send({
+    from: 'FitGo <onboarding@resend.dev>',
     to: email,
     subject: 'FitGo — Your Verification Code',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; background: #0A0A0A; color: #F5F3EE; padding: 40px; border-radius: 16px;">
         <h1 style="font-size: 32px; margin-bottom: 8px;">FitGo<span style="color: #FF3C2E;">.</span></h1>
         <p style="color: #888; margin-bottom: 32px;">Style. Delivered. Instantly.</p>
-        
         <h2 style="font-size: 20px; margin-bottom: 16px;">Hi ${name} 👋</h2>
         <p style="color: #aaa; margin-bottom: 32px;">Use the code below to verify your FitGo account. This code expires in <strong style="color: #fff;">10 minutes</strong>.</p>
-        
         <div style="background: #1C1C1C; border: 1px solid #333; border-radius: 14px; padding: 32px; text-align: center; margin-bottom: 32px;">
           <p style="color: #888; font-size: 13px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 2px;">Your verification code</p>
           <h1 style="font-size: 48px; letter-spacing: 12px; color: #FF3C2E; margin: 0;">${otp}</h1>
         </div>
-        
         <p style="color: #555; font-size: 13px;">If you didn't request this, ignore this email.</p>
         <p style="color: #555; font-size: 13px; margin-top: 24px;">— The FitGo Team, Addis Ababa 🇪🇹</p>
       </div>
     `,
-  };
-  await transporter.sendMail(mailOptions);
+  });
 };
 
 // POST /api/auth/send-otp
@@ -192,7 +188,12 @@ router.post('/approve-seller', async (req, res) => {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
+await resend.emails.send({
+  from: 'FitGo <onboarding@resend.dev>',
+  to: email,
+  subject: '🎉 You are approved to sell on FitGo!',
+  html: `... keep same html ...`,
+});
 
     res.json({ 
       message: 'Seller approved and notified', 
