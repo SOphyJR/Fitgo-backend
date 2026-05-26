@@ -1,8 +1,9 @@
 const router = require('express').Router();
 const pool = require('../config/db');
 const { Resend } = require('resend');
-const resend = new Resend(process.env.RESEND_API_KEY);
 require('dotenv').config();
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
