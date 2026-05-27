@@ -76,4 +76,15 @@ router.get('/email/:email', async (req, res) => {
   }
 });
 
+// DELETE user
+router.delete('/:firebase_uid', async (req, res) => {
+  try {
+    const { firebase_uid } = req.params;
+    await pool.query('DELETE FROM users WHERE firebase_uid = $1', [firebase_uid]);
+    res.json({ message: 'Account deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
