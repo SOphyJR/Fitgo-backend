@@ -38,18 +38,17 @@ router.get('/:id', async (req, res) => {
 // POST create store
 router.post('/', async (req, res) => {
   try {
-    const { owner_id, name, description, location, logo_url } = req.body;
+    const { owner_id, name, description, location, logo_url, status } = req.body;
     const result = await pool.query(
-      `INSERT INTO stores (owner_id, name, description, location, logo_url)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [owner_id, name, description, location, logo_url]
+      `INSERT INTO stores (owner_id, name, description, location, logo_url, status)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [owner_id, name, description, location, logo_url, status || 'pending']
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
 // PATCH approve store
 router.patch('/:id/approve', async (req, res) => {
   try {

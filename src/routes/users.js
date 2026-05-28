@@ -46,13 +46,14 @@ router.post('/', async (req, res) => {
 });
 
 // PATCH update user status (approve seller/driver)
-router.patch('/:id/status', async (req, res) => {
+// PATCH update store_id
+router.patch('/:firebase_uid/store', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { status } = req.body;
+    const { firebase_uid } = req.params;
+    const { store_id } = req.body;
     const result = await pool.query(
-      'UPDATE users SET status=$1 WHERE id=$2 RETURNING *',
-      [status, id]
+      'UPDATE users SET store_id=$1 WHERE firebase_uid=$2 RETURNING *',
+      [store_id, firebase_uid]
     );
     res.json(result.rows[0]);
   } catch (err) {
