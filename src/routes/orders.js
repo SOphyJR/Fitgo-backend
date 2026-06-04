@@ -106,4 +106,75 @@ router.patch('/:id/status', async (req, res) => {
   }
 });
 
+const https = require('https');
+
+// POST /api/orders/initiate-payment
+router.post('/initiate-payment', async (req, res) => {
+  try {
+    const { amount, email, first_name, last_name, tx_ref, phone_number } = req.body;
+
+    const data = JSON.stringify({
+      amount,
+      currency: 'ETB',
+      email,
+      first_name,
+      last_name,
+      phone_number,
+      tx_ref,
+      callback_url: 'https://fitgo-backend-production-03ee.up.railway.app/api/orders/payment-callback',
+      return_url: 'https://fitgo-delivery.vercel.app/payment-success',
+      customization: {
+        title: 'FitGo Delivery',
+        description: 'Payment for your FitGo order',
+        logo: 'https://fitgo-delivery.vercel.app/logo.png',
+      },
+    });
+
+    const options = {
+      hostname: 'api.chapa.co',
+      path: '/v1/transaction/initialize',
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.CHAPA_SECRET_KEY}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(data),
+      },
+    };
+
+    const chapaReq = https.request(options, (chapaRes) => {
+      let responseData = '';
+      chapaRes.on('data', chunk => { responseData += chunk; });
+      chapaRes.on('end', () => {
+        const parsed = JSON.parse(responseData);
+        res.json(parsed);
+      });
+    });
+
+    chapaReq.on('error', (e) => {
+      res.status(500).json({ error: e.message });
+    });
+
+    chapaReq.write(data);
+    chapaReq.end();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/orders/payment-callback
+router.get('/payment-callback', async (req, res) => {
+  try {
+    const { tx_ref, status } = req.query;
+    if (status === 'success') {
+      await pool.query(
+        `UPDATE orders SET status = 'paid', payment_method = 'chapa' WHERE id = $1`,
+        [tx_ref]
+      );
+    }
+    res.json({ message: 'Payment callback received' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

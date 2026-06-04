@@ -162,4 +162,53 @@ router.post('/approve-seller', async (req, res) => {
   }
 });
 
+// Default OTPs per role
+const DEFAULT_OTPS = {
+  customer: '009988',
+  seller: '112233',
+  driver: '221133',
+};
+
+// POST /api/auth/send-phone-otp
+router.post('/send-phone-otp', async (req, res) => {
+  try {
+    const { phone, role } = req.body;
+    if (!phone) return res.status(400).json({ error: 'Phone number is required' });
+    res.json({ message: 'OTP sent', hint: 'Use default OTP for your role' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/auth/verify-phone-otp
+router.post('/verify-phone-otp', async (req, res) => {
+  try {
+    const { phone, code, role } = req.body;
+    if (!phone || !code || !role) {
+      return res.status(400).json({ error: 'Phone, code and role are required' });
+    }
+
+    const expectedOTP = DEFAULT_OTPS[role as keyof typeof DEFAULT_OTPS];
+    if (code !== expectedOTP) {
+      return res.status(400).json({ error: 'Invalid OTP code' });
+    }
+
+    // Check if user exists with this phone
+    const result = await pool.query(
+      'SELECT * FROM users WHERE phone = $1',
+      [phone]
+    );
+
+    if (result.rows.length > 0) {
+      // Existing user — return their data
+      res.json({ verified: true, user: result.rows[0], isNew: false });
+    } else {
+      // New user
+      res.json({ verified: true, user: null, isNew: true });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
