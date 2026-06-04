@@ -188,7 +188,7 @@ router.post('/verify-phone-otp', async (req, res) => {
       return res.status(400).json({ error: 'Phone, code and role are required' });
     }
 
-    const expectedOTP = DEFAULT_OTPS[role as keyof typeof DEFAULT_OTPS];
+  const expectedOTP = DEFAULT_OTPS[role];
     if (code !== expectedOTP) {
       return res.status(400).json({ error: 'Invalid OTP code' });
     }
