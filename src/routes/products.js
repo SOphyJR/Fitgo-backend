@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
       params.push(`%${search}%`);
       query += ` AND p.name ILIKE $${params.length}`;
     }
-    query += ' ORDER BY p.created_at DESC';
+  query += ' ORDER BY p.rating DESC, p.created_at DESC';
 
     const result = await pool.query(query, params);
     res.json(result.rows);

@@ -1,5 +1,4 @@
 
-
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -33,3 +32,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 FitGo API running on port ${PORT}`);
 });
+
+app.use('/api/revenue', require('./routes/revenue'));
+
+app.use('/api/disputes', require('./routes/disputes'));

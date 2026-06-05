@@ -63,4 +63,41 @@ router.patch('/:id/approve', async (req, res) => {
   }
 });
 
+// POST /api/stores/:id/rate
+router.post('/:id/rate', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, customer_id } = req.body;
+    if (rating < 1 || rating > 5) return res.status(400).json({ error: 'Rating must be 1-5' });
+
+    // Update store average rating
+    await pool.query(
+      `UPDATE stores SET 
+        rating = (rating * total_ratings + $1) / (total_ratings + 1),
+        total_ratings = total_ratings + 1
+       WHERE id = $2`,
+      [rating, id]
+    );
+    res.json({ message: 'Rating submitted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET stores sorted by rating
+router.get('/top', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT s.*, u.name as owner_name 
+       FROM stores s 
+       JOIN users u ON s.owner_id = u.id
+       WHERE s.status = 'approved'
+       ORDER BY s.rating DESC, s.total_ratings DESC
+       LIMIT 10`
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 module.exports = router;
