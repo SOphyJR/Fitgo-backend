@@ -176,5 +176,20 @@ router.get('/payment-callback', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// GET all orders (admin)
+router.get('/', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT o.*, u.name as customer_name, s.name as store_name
+       FROM orders o
+       LEFT JOIN users u ON o.customer_id = u.id
+       LEFT JOIN stores s ON o.store_id = s.id
+       ORDER BY o.created_at DESC`
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router;
