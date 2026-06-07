@@ -87,5 +87,19 @@ router.delete('/:firebase_uid', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// PATCH save push token
+router.patch('/:firebase_uid/push-token', async (req, res) => {
+  try {
+    const { firebase_uid } = req.params;
+    const { push_token } = req.body;
+    await pool.query(
+      'UPDATE users SET push_token = $1 WHERE firebase_uid = $2',
+      [push_token, firebase_uid]
+    );
+    res.json({ message: 'Push token saved' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router;
