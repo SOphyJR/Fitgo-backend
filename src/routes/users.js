@@ -102,4 +102,21 @@ router.patch('/:firebase_uid/push-token', async (req, res) => {
   }
 });
 
+// GET user by phone
+router.get('/phone/:phone', async (req, res) => {
+  try {
+    const { phone } = req.params;
+    const result = await pool.query(
+      'SELECT * FROM users WHERE phone = $1',
+      [phone]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
