@@ -111,7 +111,8 @@ const https = require('https');
 // POST /api/orders/initiate-payment
 router.post('/initiate-payment', async (req, res) => {
   try {
-    const { amount, email, first_name, last_name, tx_ref, phone_number } = req.body;
+    const { amount, email, first_name, last_name, order_id, phone_number } = req.body;
+    const tx_ref = `fitgo_${order_id}_${Date.now()}`;
 
     const data = JSON.stringify({
       amount,
@@ -122,7 +123,7 @@ router.post('/initiate-payment', async (req, res) => {
       phone_number,
       tx_ref,
       callback_url: 'https://fitgo-backend-production-03ee.up.railway.app/api/orders/payment-callback',
-      return_url: 'https://fitgo-delivery.vercel.app/payment-success',
+      return_url: 'fitgo://payment-success',
       customization: {
         title: 'FitGo Delivery',
         description: 'Payment for your FitGo order',
@@ -166,9 +167,10 @@ router.get('/payment-callback', async (req, res) => {
   try {
     const { tx_ref, status } = req.query;
     if (status === 'success') {
+      const order_id = tx_ref ? tx_ref.split('_')[1] : null;
       await pool.query(
         `UPDATE orders SET status = 'paid', payment_method = 'chapa' WHERE id = $1`,
-        [tx_ref]
+        [order_id]
       );
     }
     res.json({ message: 'Payment callback received' });
