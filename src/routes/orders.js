@@ -123,7 +123,7 @@ router.post('/initiate-payment', async (req, res) => {
       phone_number,
       tx_ref,
       callback_url: 'https://fitgo-backend-production-03ee.up.railway.app/api/orders/payment-callback',
-      return_url: 'fitgo://payment-success',
+      return_url: `fitgo://payment-success?tx_ref=${tx_ref}`,
       customization: {
         title: 'FitGo Delivery',
         description: 'Payment for your FitGo order',
