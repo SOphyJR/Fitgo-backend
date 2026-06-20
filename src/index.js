@@ -20,8 +20,9 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/stores', require('./routes/stores'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/orders', require('./routes/orders'));
-
-
+app.use('/api/revenue', require('./routes/revenue'));
+app.use('/api/disputes', require('./routes/disputes'));
+app.use('/api/applications', require('./routes/applications'));
 
 // 404 handler
 app.use((req, res) => {
@@ -32,7 +33,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 FitGo API running on port ${PORT}`);
 });
-
-app.use('/api/revenue', require('./routes/revenue'));
-
-app.use('/api/disputes', require('./routes/disputes'));
